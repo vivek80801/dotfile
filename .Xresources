@@ -1,0 +1,24 @@
+*customization: -color
+XTerm*termName: xterm-256color
+xterm*faceName: FiraCode Nerd Font Mono
+xterm*font:     *-fixed-*-*-*-24-*
+xterm*faceSize: 16
+
+ *background: #000000
+ *foreground: #ffffff
+ *color0:     #000000
+ *color1:     #d36265
+ *color2:     #aece91
+ *color3:     #e7e18c
+ *color4:     #7a7ab0
+ *color5:     #963c59
+ *color6:     #418179
+ *color7:     #bebebe
+ *color8:     #666666
+ *color9:     #ef8171
+ *color10:    #e5f779
+ *color11:    #fff796
+ *color12:    #4186be
+ *color13:    #ef9ebe
+ *color14:    #71bebe
+ *color15:    #ffffff

@@ -1,0 +1,11 @@
+*.txt
+*.pem
+*.pub
+*rsa
+*.zcompdump
+*history
+*errors*
+.netrwhist
+*search_history*
+*.swp
+nvim/plugin/packer_compiled.lua
