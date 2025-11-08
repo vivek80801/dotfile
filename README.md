@@ -18,3 +18,16 @@ This is specific for **ubuntu**. If you are on some other operating system this 
 ## Preview
 
 ![vim](./preview/vim.png)
+
+## Commands
+
+No Configuration
+```sh
+# Load without any Configuration. even without runtime Configuration. like netrw, tabline, etc will be disabled by default
+vim -u NONE
+nvim -u NONE
+
+# Load without user Configuration. It will load runtime Configuration. like netrw, tabline, etc will be enabled by default
+vim -u NORC -N
+nvim -u NORC -N
+```

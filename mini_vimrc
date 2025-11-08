@@ -1,0 +1,89 @@
+syntax on
+filetype plugin on
+
+set exrc
+set tabstop=4 softtabstop=4
+set shiftwidth=4
+set expandtab
+set smartindent
+set relativenumber
+set signcolumn=yes
+set number
+set hidden
+set updatetime=50
+set scrolloff=8
+set noerrorbells
+set wildignore+=**/node_modules/*
+set wildignore+=**/.git/*
+set wildignore+=**/.build/*
+set wildignore+=**/.dist/*
+set background=dark
+set noerrorbells visualbell t_vb=
+set showmatch
+
+"netrw the file explorer or file tree
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_winsize = 15
+let g:netrw_bufsettings="noma nomod nu nobl nowrap ro rnu"
+let g:netrw_list_hide= '.*\.swp$'
+
+colorscheme habamax
+
+let mapleader = " "
+
+"vim keybindings
+inoremap jj <Esc>
+inoremap ( ()<Esc>i
+inoremap { {}<Esc>i
+inoremap [ []<Esc>i
+inoremap " ""<Esc>i
+inoremap ' ''<Esc>i
+inoremap ` ``<Esc>i
+inoremap < <><Esc>i
+nnoremap ew <C-w><C-w>
+nnoremap eh <C-w>h
+nnoremap el <C-w>l
+nnoremap <leader>; A;<Esc>
+nnoremap <leader>e :Lexplore<CR>
+nnoremap <leader>w :w<CR>
+nnoremap <leader>wq :wq<CR>
+nnoremap <leader>q :q<CR>
+nnoremap <leader>qq :q!<CR>
+nnoremap <leader>re :so<Space>%<CR>
+nnoremap <leader>s :e<Space>**/
+nnoremap <c-j> :cnext<CR>
+nnoremap <c-k> :cprev<CR>
+nnoremap <leader>o :lopen<CR>
+nnoremap <leader>j :lnext<CR>
+nnoremap <leader>k :lprev<CR>
+nnoremap <leader>{ dawa <Esc>a{}<Esc>h
+nnoremap <leader>( dawa <Esc>a()<Esc>hp
+nnoremap <leader>[ dawa <Esc>a[]<Esc>hp
+nnoremap <leader>E :let g:netrw_winsize = 28<CR>
+nnoremap <leader>W :let g:netrw_winsize = 15<CR>
+nnoremap <leader>t :tabnew<CR>
+nnoremap <leader>n :tabnext<CR>
+nnoremap <leader>p :tabprevious<CR>
+
+
+"auto command
+if has("autocmd")
+    augroup remember_folds
+        autocmd!
+        autocmd BufWinLeave * mkview
+        autocmd BufWinEnter * silent! loadview
+    augroup END
+
+    augroup change_cursor_when_changing_modes
+        autocmd!
+        autocmd InsertEnter * silent execute "!echo -en \<esc>[5 q"
+        autocmd InsertLeave * silent execute "!echo -en \<esc>[2 q"
+    augroup END
+
+    augroup block_cursor_when_vim_starts
+        autocmd!
+        autocmd VimEnter * silent !echo -ne "\e[2 q \e]12;white\a"
+    augroup END
+endif
+

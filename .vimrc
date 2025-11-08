@@ -36,8 +36,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
     Plug 'airblade/vim-gitgutter'
     Plug 'szw/vim-maximizer'
-    Plug 'yaegassy/coc-blade'
     Plug 'mbbill/undotree'
+    Plug 'sheerun/vim-polyglot'
     call plug#end()
     colorscheme gruvbox
 else

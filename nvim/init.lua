@@ -1,3 +1,13 @@
+
+-- local Plug = vim.fn['plug#']
+vim.cmd [[
+call plug#begin('~/.local/share/nvim/plugged')
+Plug 'sheerun/vim-polyglot'
+Plug 'mbbill/undotree'
+call plug#end()
+]]
+
+
 -- Install packer
 local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
 local is_bootstrap = false
@@ -55,6 +65,7 @@ require('packer').startup(function(use)
   use 'folke/neodev.nvim'                   -- Autocompletion for vim apis in neovim
   use 'morhetz/gruvbox'
   use 'ThePrimeagen/vim-be-good'
+  use 'sheerun/vim-polyglot'   
   use 'vivek80801/Brackets'
 
   -- Fuzzy Finder (files, lsp, etc)
