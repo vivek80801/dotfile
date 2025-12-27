@@ -69,7 +69,8 @@ beautiful.init("~/.config/awesome/themes/default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 local browser = "brave-browser"
-local terminal = "x-terminal-emulator"
+--local terminal = "x-terminal-emulator"
+local terminal = "xfce4-terminal"
 local editor = os.getenv("EDITOR") or "vi"
 local editor_cmd = terminal .. " -e " .. editor
 

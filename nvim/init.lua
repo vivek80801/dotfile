@@ -358,7 +358,7 @@ local on_attach = function(_, bufnr)
 
   nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-  nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
+  nmap('gi', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
   nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
   nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
@@ -497,7 +497,7 @@ require('lspconfig').html.setup {
 require('lspconfig').emmet_ls.setup({
   on_attach = on_attach,
   capabilities = capabilities,
-  filetypes = { 'html', 'typescriptreact', 'javascriptreact' },
+  filetypes = { 'html', 'typescriptreact', 'javascriptreact', 'php', 'blade' },
   init_options = {
     html = {
       options = {
@@ -516,7 +516,7 @@ require('lspconfig').phpactor.setup {
 require('lspconfig').cssls.setup {
   on_attach = on_attach,
   capabilities = capabilities,
-  filetypes = { 'css', 'scss', 'less', 'sass' },
+  filetypes = { 'css', 'scss', 'less', 'sass', 'html', 'php', 'blade' },
   flags = {}
 }
 
@@ -583,6 +583,23 @@ require('telescope').setup({
       "public/build"
     },
   },
+})
+
+vim.diagnostic.config({
+  virtual_text = {
+    max_len = 10,
+  },
+  float = {
+    wrap = true,
+    max_width = 80,
+    border = "rounded",
+  },
+})
+
+vim.api.nvim_create_autocmd("CursorHold", {
+  callback = function()
+    vim.diagnostic.open_float(nil, { focus = false })
+  end,
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
