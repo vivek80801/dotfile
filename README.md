@@ -15,9 +15,13 @@ This is specific for **ubuntu**. If you are on some other operating system this 
   ./install/install.sh
   ```
 
-## Preview
+## Preview Vim
 
 ![vim](./preview/vim.png)
+
+## Preview tmux
+
+![vim](./preview/preview_tmux.png)
 
 ## Commands
 
