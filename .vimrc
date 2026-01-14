@@ -126,6 +126,34 @@ endfunction
 
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
 
+function! AskAI()
+    " Get the selected text or the whole buffer
+    let l:prompt = input("AI Prompt: ")
+    let l:lines = getline(1, '$')
+    let l:context = join(l:lines, "\n")
+
+    echo "\nThinking..."
+
+    " Use curl to hit your Dockerized Ollama
+    let l:cmd = "curl -s http://localhost:11434/api/generate -d '" .
+        \ json_encode({
+        \   "model": "qwen2.5-coder:1.5b",
+        \   "prompt": l:prompt . "\n\nContext:\n" . l:context,
+        \   "stream": v:false
+        \ }) . "' | jq -r .response"
+
+    let l:result = system(l:cmd)
+
+    " Open a new scratch buffer to show the result
+    new
+    setlocal buftype=nofile bufhidden=hide noswapfile
+    put =l:result
+endfunction
+
+" Map it to something that doesn't interfere
+nnoremap <leader>q :call AskAI()<CR>
+
+
 "auto command
 if has("autocmd")
     augroup remember_folds
