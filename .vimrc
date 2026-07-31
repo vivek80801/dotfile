@@ -20,6 +20,8 @@ set wildignore+=**/.dist/*
 set background=dark
 set noerrorbells visualbell t_vb=
 set showmatch
+set spell
+set spelllang=en
 
 "netrw the file explorer or file tree
 let g:netrw_banner = 0
