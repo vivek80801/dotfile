@@ -4,6 +4,8 @@ const path = require("path");
 const { exec } = require("child_process");
 const { createServer, IncomingMessage, ServerResponse } = require("http");
 
+let fileData = "";
+
 function getLocalIp() {
   const interfaces = Object.values(os.networkInterfaces());
   for (let iface of interfaces) {
@@ -22,9 +24,6 @@ function getLocalIp() {
 
 const sub_process = exec("pwd");
 
-let staticFileData = "";
-let fileData;
-
 class Router {
   /**
    * @param {IncomingMessage} req
@@ -35,6 +34,7 @@ class Router {
      * @property {Array<string>} urls
      */
     this.urls = [];
+    this.routes = [];
     this.req = req;
     this.res = res;
     //    this.res = Object.assign(res, {send});
@@ -55,6 +55,7 @@ class Router {
       const newFileName = halfFileName + "." + ext;
       if (
         ext === "png" ||
+        ext === "zip" ||
         ext === "jpg" ||
         ext === "gif" ||
         ext === "ico" ||
@@ -71,10 +72,20 @@ class Router {
           this.res.writeHead(200, { "Content-Type": `video/${ext}` });
         } else if (ext === "pdf") {
           this.res.writeHead(200, { "Content-Type": `application/${ext}` });
+        } else if (ext === "zip") {
+          const currentFileNameArray = fileName.split("/");
+          const currentFileName =
+            currentFileNameArray[currentFileNameArray.length - 1];
+          const stat = fs.statSync(fileName);
+          this.res.writeHead(200, {
+            "Content-Type": "application/" + ext,
+            "Content-Disposition": "attachment; filename=" + currentFileName,
+            "Content-Length": stat.size,
+          });
         } else {
           this.res.writeHead(200, { "Content-Type": `image/${ext}` });
         }
-        const stream = fs.createReadStream(newFileName);
+        const stream = fs.createReadStream(fileName);
         stream.pipe(this.res);
       } else {
         fs.readFile(newFileName, { encoding: "utf8" }, (err, data) => {
@@ -144,10 +155,31 @@ class Router {
    * callback is a function that will be called when request will be made to that url
    */
   get(url, callback) {
-    if (url === this.req.url && this.req.method === "GET") {
-      this.urls.push(url);
-      callback(this.req, this.res);
-    }
+    this.routes.push({ url, callback, method: "GET" });
+  }
+  resolve() {
+    this.routes.forEach((route) => {
+      if(
+        this.req.url === route.url &&
+        this.req.method === route.method
+      )
+      {
+        if(this.req.method === "GET") {
+          route.callback(this.req, this.res);
+        }else if(this.req.method === "POST"){
+            let bodyData = "";
+            this.req.on("data", (data) => {
+              bodyData += data.toString();
+            });
+            this.req.on("end", () => {
+              this.req.body = bodyData;
+              this.req.__proto__.body = JSON.parse(bodyData);
+              route.callback(this.req, this.res);
+            });
+        }
+        return;
+      }
+    })
   }
   /**
    * post method for post request
@@ -157,20 +189,10 @@ class Router {
    * callback is a function that will be called when request will be made to that url
    */
   post(url, callback) {
-    if (url === this.req.url && this.req.method === "POST") {
-      let bodyData = "";
-      this.req.on("data", (data) => {
-        bodyData += data.toString();
-      });
-      this.req.on("end", () => {
-        this.req.__proto__.body = JSON.parse(bodyData);
-      });
-      this.req.body = bodyData;
-      this.urls.push(url);
-      callback(this.req, this.res);
-    }
+    this.routes.push({ url, callback, method: "POST" });
   }
 }
+
 
 sub_process.stdout.on("data", (data) => {
   /**
@@ -178,6 +200,7 @@ sub_process.stdout.on("data", (data) => {
    * @returns {string[]}
    */
   const getFiles = () => {
+    let countDataDir = 0;
     /**
      * @type {string[]} files
      * It will contain all the files
@@ -188,14 +211,23 @@ sub_process.stdout.on("data", (data) => {
      * Name of directory
      */
     const getDirectory = (directory) => {
-      fs.readdirSync(directory).forEach((file) => {
-        const absolute = path.join(directory, file);
-        if (fs.statSync(absolute).isDirectory()) {
-          return getDirectory(absolute);
-        } else {
-          return files.push(absolute.replace(data.replace("\n", ""), ""));
-        }
-      });
+      if (directory.trim() === data.trim()) {
+        countDataDir = countDataDir + 1;
+      }
+      if (
+        (directory.trim() === data.trim() && countDataDir <= 1) ||
+        directory.trim() !== data.trim()
+      ) {
+        fs.readdirSync(directory).forEach((file) => {
+          const absolute = path.join(directory, file);
+          if (fs.statSync(absolute).isDirectory()) {
+            return absolute;
+            //return getDirectory(absolute);
+          } else {
+            return files.push(absolute.replace(data.replace("\n", ""), ""));
+          }
+        });
+      }
     };
     getDirectory(data.replace("\n", ""));
     return files;
@@ -211,22 +243,35 @@ sub_process.stdout.on("data", (data) => {
   const server = createServer((req, res) => {
     const router = new Router(req, res);
     const staticFiles = getFiles();
-    staticFiles.forEach((file) => {
-      if (file === "/index.html") {
-        router.get("/", (req, res) => {
-          res.sendFile(data.replace("\n", "") + "/index.html");
-        });
+    let result = "";
+    let isFile = false;
+
+    router.get("/", (req, res) => {
+      staticFiles.forEach((file, idx) => {
+        if (file === "/index.html") {
+          isFile = true;
+        } else {
+          if (idx === 0) {
+            result += `
+            <li>
+                <a href="./">/</a>
+            </li>
+            `;
+          } else {
+            result += `<li>
+            <a href="./${file.replace("/", "")}">
+                ${file.replace("/", "")}
+              </a>
+            </li>`;
+          }
+        }
+      });
+
+      if (isFile) {
+        res.sendFile(data.replace("\n", "") + "/index.html");
       } else {
-        router.get("/", (req, res) => {
-          let result = "";
-          staticFiles.map((file) => {
-            result += ` <li><a href="/${file.replace("/", "")}">${file.replace(
-              "/",
-              ""
-            )}</li>`;
-          });
-          setTimeout(() => {
-            res.send(`
+        //console.log(result);
+        res.send(`
             <!DOCTYPE html>
             <html>
             <head>
@@ -241,7 +286,7 @@ sub_process.stdout.on("data", (data) => {
               body{
                 font-family: Verdana, Geneva, sans-serif;
                 width: 98vw;
-                height: 100vh;
+                min-height: 100vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -251,8 +296,8 @@ sub_process.stdout.on("data", (data) => {
               ul {
                 display: flex;
                 justify-content: center;
-                align-itmes: center;
                 flex-direction: column;
+                overflow: scroll;
               }
               ul > li {
                 list-style: none;
@@ -260,10 +305,11 @@ sub_process.stdout.on("data", (data) => {
                 border: 1px solid #333;
                 border-bottom: none;
               }
+              /*
               ul > li:nth-child(${staticFiles.length - 1}) {
                 border-bottom: 1px solid #f00;
                 background-color: #0f0;
-              }
+              }*/
               ul > li:hover {
                 background-color: #b7b7b7;
               }
@@ -275,14 +321,15 @@ sub_process.stdout.on("data", (data) => {
                 <ul>${result}</ul>
             </body>
             </html>
-                `);
-          }, 100);
-        });
+         `);
       }
-      router.get(file, (req, res) => {
-        res.sendFile(data.replace("\n", "") + file);
-      });
     });
+
+    staticFiles.forEach((file) => {
+        router.get(file, (req, res) => {
+          res.sendFile(data.replace("\n", "") + file);
+        });
+    })
 
     router.get("/change", (req, res) => {
       res.send(JSON.stringify({ msg: false }));
@@ -315,12 +362,14 @@ sub_process.stdout.on("data", (data) => {
         });
       });
     });
+    router.resolve();
   });
+
 
   server.listen(port, () => {
     console.log(
       `\n\x1b[1;44;38m server is up and runing on http://localhost:${port}.\x1b[0m\n`,
-      `\x1b[1;42;38m you can also check your website on connected devices on http://${getLocalIp()}:${port}.\x1b[0m\n`
+      `\x1b[1;42;38m you can also check your website on connected devices on http://${getLocalIp()}:${port}.\x1b[0m\n`,
     );
   });
 
@@ -333,8 +382,8 @@ sub_process.stdout.on("data", (data) => {
         server.listen(port, () =>
           console.log(
             `\n\x1b[1;44;38m server is up and runing on http://localhost:${port}.\x1b[0m\n`,
-            `\x1b[1;42;38m you can also check your website on connected devices on http://${getLocalIp()}:${port}.\x1b[0m\n`
-          )
+            `\x1b[1;42;38m you can also check your website on connected devices on http://${getLocalIp()}:${port}.\x1b[0m\n`,
+          ),
         );
       }, 1000);
     }
