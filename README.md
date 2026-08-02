@@ -1,6 +1,6 @@
 # Download
 
-This is specific for **ubuntu**. If you are on some other operating system this will not work.
+This is specific for **Ubuntu**. If you are on some other operating system this will not work.
 
 - Download zip file from this repo.
 - Unzip file
@@ -25,7 +25,8 @@ This is specific for **ubuntu**. If you are on some other operating system this 
 
 ## Commands
 
-No Configuration
+#### No Configuration
+
 ```sh
 # Load without any Configuration. even without runtime Configuration. like netrw, tabline, etc will be disabled by default
 vim -u NONE
@@ -34,4 +35,9 @@ nvim -u NONE
 # Load without user Configuration. It will load runtime Configuration. like netrw, tabline, etc will be enabled by default
 vim -u NORC -N
 nvim -u NORC -N
+
+# Load minivimrc
+vim -u mini_vimrc NORC -N .
+nvim -u mini_vimrc NORC -N .
+
 ```
