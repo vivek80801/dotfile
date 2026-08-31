@@ -23,7 +23,7 @@ set showmatch
 set spell
 set spelllang=en
 
-"netrw the file explorer or file tree
+" netrw the file explorer or file tree
 let g:netrw_banner = 0
 let g:netrw_liststyle = 3
 let g:netrw_winsize = 15
@@ -180,3 +180,9 @@ endif
 au fileType typescriptreact iab rfce import<Space>React<Space>from<Space>"<Esc>A<bs>react"<Esc>A<bs>;<Enter><Enter>const<Space><Esc>:put =expand('%:t')<CR><Esc>kJA<bs><bs><bs><bs> :React.FC = ():JSX.Element => {<Enter>return(<Enter><<Esc>la<Enter><<Esc>a/<Esc>A<bs><Enter><Enter>export default<Esc>:put =expand('%:t')<CR>kJA<bs><bs><bs><bs>;<Esc>3ko
 au fileType typescriptreact iab st const<Space>[state,<Space>setState<Esc>A<Space>=<Space>React.useState(<Esc>A;<Esc>F(a
 au fileType typescriptreact iab ef const<Space>[state,<Space>setState<Esc>A<Space>=<Space>React.useState(<Esc>A;<Esc>F(a
+
+" Spelling mistake
+hi SpellLocal cterm=underline ctermfg=208 ctermbg=NONE
+hi SpellBad cterm=underline ctermfg=196 ctermbg=NONE   " 196 = Bright Red
+hi SpellCap cterm=underline ctermfg=226 ctermbg=NONE   " 226 = Yellow
+hi SpellRare cterm=underline ctermfg=39 ctermbg=NONE   " 39 = Blue
