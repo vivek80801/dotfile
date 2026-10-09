@@ -15,6 +15,7 @@ vim.opt.backup = false
 vim.opt.updatetime=50
 vim.opt.scrolloff=8
 vim.opt.wildignore.add='**/*/node_modules'
+vim.opt.wildignore.add='**/*/vendor'
 vim.opt.wildignore.add='**/.git'
 vim.opt.wildignore.add='**/build'
 vim.opt.wildignore.add='**/dist'

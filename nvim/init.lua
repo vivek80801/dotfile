@@ -17,6 +17,29 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.cmd [[packadd packer.nvim]]
 end
 
+vim.api.nvim_create_autocmd({"BufRead","BufNewFile"}, {
+  pattern = "*.gd",
+  callback = function()
+    vim.bo.filetype = "gdscript"
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "gdscript",
+  callback = function()
+    local handle = io.popen("nc -z 127.0.0.1 6008 && echo ok")
+    local result = handle:read("*a")
+    handle:close()
+
+    if result:match("ok") then
+      vim.lsp.start({
+        name = "gdscript",
+        cmd = vim.lsp.rpc.connect("127.0.0.1", 6008),
+      })
+    end
+  end,
+})
+
 require('packer').startup(function(use)
   -- Package manager
   -- Lua
@@ -69,10 +92,21 @@ require('packer').startup(function(use)
   use 'vivek80801/Brackets'
 
   -- Fuzzy Finder (files, lsp, etc)
-  use { 'nvim-telescope/telescope.nvim', branch = '0.1.x', requires = { 'nvim-lua/plenary.nvim' } }
+  use {
+    'nvim-telescope/telescope.nvim',
+    branch = '0.1.x',
+    requires = 
+      {
+        'nvim-lua/plenary.nvim'
+      }
+  }
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
-  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
+  use {
+    'nvim-telescope/telescope-fzf-native.nvim',
+    run = 'make',
+    cond = vim.fn.executable 'make' == 1 
+  }
 
 
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
@@ -147,6 +181,8 @@ vim.o.completeopt = 'menuone,noselect'
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.o.spell = true
+vim.o.spelllang = 'en'
 
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
@@ -390,8 +426,24 @@ require('mason').setup()
 
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'ts_ls', 'lua_ls', 'html', 'cssls', 'emmet_ls',
-  'intelephense', 'phpactor', 'jdtls', 'vimls', 'stylelint_lsp', 'dockerls', 'diagnosticls', 'cssmodules_ls' }
+local servers = {
+  'clangd',
+  'rust_analyzer',
+  'pyright',
+  'ts_ls',
+  'lua_ls',
+  'html',
+  'cssls',
+  'emmet_ls',
+  'intelephense',
+  'phpactor',
+  'jdtls',
+  'vimls',
+  'dockerls',
+  'diagnosticls',
+  'cssmodules_ls'
+}
+
 --local servers = { 'clangd', 'rust_analyzer', 'pyright', 'ts_ls', 'sumneko_lua'}
 
 -- Ensure the servers above are installed
@@ -447,6 +499,13 @@ require('lspconfig').lua_ls.setup {
 -- nvim-cmp setup
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
+
+local function godot_running(port)
+  local tcp = vim.loop.new_tcp()
+  local ok = tcp:connect("127.0.0.1", port)
+  tcp:close()
+  return ok == nil -- if no error, connection attempt started
+end
 
 cmp.setup {
   snippet = {
@@ -542,11 +601,6 @@ require('lspconfig').vimls.setup{
   capabilities = capabilities
 }
 
-require('lspconfig').stylelint_lsp.setup{
-  on_attach = on_attach,
-  capabilities = capabilities
-}
-
 require('lspconfig').dockerls.setup{
   on_attach = on_attach,
   capabilities = capabilities
@@ -562,10 +616,6 @@ require('lspconfig').cssmodules_ls.setup{
   capabilities = capabilities
 }
 
-require('lspconfig').gdscript.setup{
-  on_attach = on_attach,
-  capabilities = capabilities
-}
 
 require('lspconfig').rust_analyzer.setup{
   on_attach = on_attach,
@@ -602,6 +652,10 @@ vim.api.nvim_create_autocmd("CursorHold", {
   end,
 })
 
+vim.g.php_htmlInStrings = true
+vim.g.php_sql_query = true
+vim.g.php_baselib = true
+
 require'lspconfig'.tailwindcss.setup{
   on_attach = on_attach,
   filetypes = { "html", "javascript", "typescript", "javascriptreact", "typescriptreact", "vue", "blade", "php", "css", "scss" },
@@ -612,9 +666,6 @@ require'lspconfig'.tailwindcss.setup{
   }
 }
 
-
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
 require('remaps/custom')
 require('sets/init')
 require('netrw/init')
